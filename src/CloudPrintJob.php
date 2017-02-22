@@ -169,7 +169,7 @@ class CloudPrintJob
 	protected function formatPostData() {
 		$postData = [
 		    'contentType' => $this->getContentType(),
-		    'ticket' => $this->getTicket(),
+		    'ticket' => json_encode($this->getTicket()),
 		    'tag' => $this->getTags()
 		];
 
