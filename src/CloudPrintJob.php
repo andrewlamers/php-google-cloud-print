@@ -143,17 +143,27 @@ class CloudPrintJob
 		return $this;
 	}
 
-	public function mediaSizeInches($width, $height) {
+	public function mediaSize($mediaSize, $is_continuous_feed = false) {
+		if(!is_bool($is_continuous_feed))
+			$is_continuous_feed = false;
+
+		$mediaSize['is_continuous_feed'] = $is_continuous_feed;
+		$this->ticket('media_size', $mediaSize);
+		return $this;
+	}
+
+	public function mediaSizeInches($vendor_id, $width, $height) {
 		$inchToMicron = 0.000039370;
-		$this->mediaSizeMicrons(floor($width/$inchToMicron), floor($height/$inchToMicron));
+		$this->mediaSizeMicrons($vendor_id, floor($width/$inchToMicron), floor($height/$inchToMicron));
 
 		return $this;
 	}
 
-	public function mediaSizeMicrons($width, $height) {
+	public function mediaSizeMicrons($vendor_id, $width, $height) {
 		$this->ticket('media_size', [
 			'width_microns' => $width,
-		    'height_microns' => $height
+		    'height_microns' => $height,
+		    'vendor_id' => $vendor_id
 		]);
 
 		return $this;
@@ -162,14 +172,14 @@ class CloudPrintJob
 	protected function formatTicket() {
 		return [
 			'version' => '1.0',
-		    'print' => $this->ticket
+		    'print' =>  $this->ticket
 		];
 	}
 
 	protected function formatPostData() {
 		$postData = [
 		    'contentType' => $this->getContentType(),
-		    'ticket' => json_encode($this->getTicket()),
+		    'ticket' => $this->getTicket(),
 		    'tag' => $this->getTags()
 		];
 
@@ -183,6 +193,7 @@ class CloudPrintJob
                         $this->formatPostData());
 
 		if(!$response->success && $response->errorCode == 8) {
+
 			$invite = $this->api->processInvite($this->getPrinterId());
 
 			if($invite->success == true)

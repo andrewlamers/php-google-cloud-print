@@ -13,6 +13,7 @@ use Andrewlamers\PhpGoogleCloudPrint\Exceptions\InvalidCredentialsException;
 use Andrewlamers\PhpGoogleCloudPrint\Exceptions\MissingConfigValue;
 use Andrewlamers\PhpGoogleCloudPrint\Storage\StorageInterface;
 use GuzzleHttp\Client;
+use GuzzleHttp\Post\PostBody;
 
 class CloudPrintApi
 {
@@ -162,7 +163,14 @@ class CloudPrintApi
 	public function post($service, $data = [], $headers = []) {
 		$client = $this->getBaseHttpClient();
 		$url = $this->getUrl($service);
-		$this->response = $client->post($url, ['body' => $data, 'headers' => $headers]);
+		$headers['Content-Type'] = 'multipart/form-data';
+		$body = new PostBody();
+		$body->forceMultipartUpload(true);
+		$body->replaceFields($data);
+
+		$this->request = $client->createRequest('POST', $url, ['body' => $body, 'headers' => $headers]);
+
+		$this->response = $client->send($this->request);
 		return $this->response;
 	}
 
@@ -186,8 +194,8 @@ class CloudPrintApi
 		return $this->getResponse();
 	}
 
-	public function jobs() {
-		$this->post('jobs');
+	public function jobs($params = []) {
+		$this->post('jobs', $params);
 		return $this->getResponse();
 	}
 
@@ -200,11 +208,13 @@ class CloudPrintApi
 		$params['printerid'] = $printerid;
 		$params['title'] = $title;
 		$params['content'] = $content;
+		$params['ticket'] = json_encode($params['ticket']);
+
 		$this->post('submit', $params);
 		return $this->getResponse();
 	}
 
-	public function processInvite($printerid, $accept = true) {
+	public function processInvite($printerid, $accept = 'true') {
 		$payload = [
 			'printerid' => $printerid,
 			'accept' => $accept
