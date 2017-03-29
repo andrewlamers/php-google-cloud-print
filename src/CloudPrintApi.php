@@ -145,10 +145,8 @@ class CloudPrintApi
 	public function getBaseHttpClient() {
 		$this->baseHttpClient = new Client(
 			[
-				'defaults' => [
-					'headers' => [
-						'Authorization' => 'Bearer '.$this->getAccessToken()
-					]
+				'headers' => [
+					'Authorization' => 'Bearer '.$this->getAccessToken()
 				]
 			]
 		);
@@ -163,14 +161,22 @@ class CloudPrintApi
 	public function post($service, $data = [], $headers = []) {
 		$client = $this->getBaseHttpClient();
 		$url = $this->getUrl($service);
-		$headers['Content-Type'] = 'multipart/form-data';
-		$body = new PostBody();
-		$body->forceMultipartUpload(true);
-		$body->replaceFields($data);
+		//$headers['Content-Type'] = 'multipart/form-data';
+		//$body = new PostBody();
+		//$body->forceMultipartUpload(true);
+		//$body->replaceFields($data);
 
-		$this->request = $client->createRequest('POST', $url, ['body' => $body, 'headers' => $headers]);
+		$multipart = [];
+		foreach($data as $k => $v) {
+			$multipart[] = [
+				'name' => $k,
+			    'contents' => $v
+			];
+		}
 
-		$this->response = $client->send($this->request);
+		$this->response = $client->request('POST', $url, ['multipart' => $multipart, 'headers' => $headers]);
+
+		//$this->response = $client->send($this->request);
 		return $this->response;
 	}
 
@@ -181,7 +187,7 @@ class CloudPrintApi
 	}
 
 	public function printers($proxy, $extra_fields = '') {
-		$this->response = $this->post('list', ['proxy' => $proxy, 'extra_fields']);
+		$this->response = $this->post('list', ['proxy' => $proxy, 'extra_fields' => $extra_fields]);
 		return $this->getResponse();
 	}
 
