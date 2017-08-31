@@ -6,7 +6,7 @@
         "guzzlehttp/guzzle": "~6",
         "google/apiclient": "^2.0",
         "php": ">=5.5.9",
-        "illuminate/support": "5.1.*|5.2.*|5.3.*"
+        "illuminate/support": "5.1.*|5.2.*|5.3.*|5.4.*"
     },
     "autoload": {
         "psr-4": {
