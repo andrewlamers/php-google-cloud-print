@@ -35,6 +35,14 @@ class CloudPrint extends CloudPrintApi
 	}
 
 	public function job($contentType) {
-		return new CloudPrintApi($contentType, false, $this->config);
+		return new CloudPrintJob($contentType, false, $this->config);
+	}
+
+	public function pdf($pdf) {
+		$job = new CloudPrintJob('application/pdf', false, $this->config);
+		$job->setContentTransferEncoding('base64');
+		$job->content($pdf);
+
+		return $job;
 	}
 }

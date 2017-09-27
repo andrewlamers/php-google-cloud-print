@@ -21,6 +21,7 @@ class CloudPrintJob
 	protected $tags = [];
 	protected $title;
 	protected $api;
+	protected $contentTransferEncoding;
 
 	public function __construct($contentType = false, $printerid = false, $config = []) {
 
@@ -54,7 +55,6 @@ class CloudPrintJob
 
 	public function printer($printerid) {
 		$this->printerid = $printerid;
-
 		return $this;
 	}
 
@@ -68,6 +68,15 @@ class CloudPrintJob
 
 	public function getContentType() {
 		return $this->contentType;
+	}
+
+	public function setContentTransferEncoding($transferEncoding) {
+		$this->contentTransferEncoding = $transferEncoding;
+		return $this;
+	}
+
+	public function getContentTransferEncoding() {
+		return $this->contentTransferEncoding;
 	}
 
 	public function getTags() {
@@ -182,6 +191,10 @@ class CloudPrintJob
 		    'ticket' => $this->getTicket(),
 		    'tag' => $this->getTags()
 		];
+
+		if($this->getContentTransferEncoding()) {
+			$postData['contentTransferEncoding'] = $this->getContentTransferEncoding();
+		}
 
 		return $postData;
 	}
